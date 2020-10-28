@@ -98,6 +98,9 @@
     >
       Download
     </button>
+    <button id="reset" class="btn" onclick="reset()" style="display: none">
+      Reset
+    </button>
 
     <script>
       const tagRE = /\[(?<tag>.*)\((?<params>.*)\)\]/;
@@ -136,6 +139,8 @@
       var finished = [];
 
       async function read() {
+        finished = [];
+        resultElement.innerHTML = "";
         var selection = [];
         var selectInputs = document.getElementsByName(`TAG`);
         for (var t = 0; t < selectInputs.length; t++) {
@@ -295,6 +300,7 @@
             resultElement.appendChild(node);
             if (finished.length === files.length) {
               document.getElementById("download").style.display = `block`;
+              document.getElementById("reset").style.display = `block`;
             }
           };
           await reader.readAsText(files[i]);
@@ -302,6 +308,12 @@
       }
       function download() {
         XLSX.writeFile(wb, files[0].name.replace(`.txt`, `.xlsx`));
+      }
+      function reset() {
+        finished = [];
+        resultElement.innerHTML = "";
+        document.getElementById("download").style.display = `none`;
+        document.getElementById("reset").style.display = `none`;
       }
     </script>
   </body>
