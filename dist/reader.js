@@ -54,6 +54,11 @@ function read() {
 }
 
 function convert() {
+  wb = XLSX.utils.book_new();
+  finished = [];
+  char_names = [];
+  char_names_used = [];
+
   var selection = [];
   var selectInputs = document.getElementsByName(`TAG`);
   isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
@@ -65,7 +70,6 @@ function convert() {
       if (selectInputs[t].value === `PLAYMUSIC`) selection.push(`STOPSOUND`);
     }
   }
-
   for (var i = 0; i < files.length; i++) {
     var result = [];
     var lastLine = "";
@@ -139,6 +143,13 @@ function convert() {
                       `focus ${params.focus}`,
                     ];
                   result.push(arr);
+                  if (isSelectedGetCharNamesImages) {
+                    if (params.name2 && params.focus === "2") {
+                      char_image = params.name2;
+                    } else {
+                      char_image = params.name;
+                    }
+                  }
                 } else {
                   result.pop();
                 }
@@ -162,24 +173,24 @@ function convert() {
                 break;
             }
             lastLine = tag;
-          }
-          //Extra Character Names + Images
-          if (isSelectedGetCharNamesImages) {
-            if (tag === "CHARACTER") {
-              var obj = {};
-              params = params.split(`,`);
-              params.forEach((param) => {
-                param = param.trim();
-                var [key, value] = param.split(`=`);
-                obj[key] = value.replaceAll(`"`, ``);
-              });
-              params = obj;
-              if (params.name2 && params.focus === "2") {
-                char_image = params.name2;
-              } else {
-                char_image = params.name;
+          } else {
+            //Extra Character Names + Images
+            if (isSelectedGetCharNamesImages) {
+              if (tag === "CHARACTER") {
+                var obj = {};
+                params = params.split(`,`);
+                params.forEach((param) => {
+                  param = param.trim();
+                  var [key, value] = param.split(`=`);
+                  obj[key] = value.replaceAll(`"`, ``);
+                });
+                params = obj;
+                if (params.name2 && params.focus === "2") {
+                  char_image = params.name2;
+                } else {
+                  char_image = params.name;
+                }
               }
-              console.log(char_image);
             }
           }
         } else {
@@ -201,6 +212,14 @@ function convert() {
                 }
                 char_names.push(arr);
                 char_names_used.push(name);
+              } else {
+                char_names.forEach((m) => {
+                  if (m[0] === name) {
+                    if (!m.includes(char_image)) {
+                      m.push(char_image);
+                    }
+                  }
+                });
               }
             }
             lastLine = `DIALOG`;
