@@ -32,6 +32,10 @@ var wb = XLSX.utils.book_new();
 var files = document.getElementById("input").files;
 var resultElement = document.getElementById(`result`);
 var finished = [];
+var char_names = [];
+var char_names_used = [];
+
+var isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
 
 function read() {
   reset();
@@ -49,6 +53,7 @@ function read() {
 function convert() {
   var selection = [];
   var selectInputs = document.getElementsByName(`TAG`);
+  isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
   for (var t = 0; t < selectInputs.length; t++) {
     if (selectInputs[t].checked) {
       selection.push(selectInputs[t].value);
@@ -163,6 +168,13 @@ function convert() {
             )
               result.push([""]);
             result.push([name, text]);
+            //Extra Character Names
+            if (isSelectedGetCharNames) {
+              if (!char_names_used.includes(name)) {
+                char_names.push([name]);
+                char_names_used.push(name);
+              }
+            }
             lastLine = `DIALOG`;
           } else {
             if (line.length > 1 && line[0] !== `[` && !line.includes(`//`)) {
@@ -199,11 +211,18 @@ function convert() {
 }
 
 function download() {
+  if (isSelectedGetCharNames) {
+    console.log(char_names);
+    var ws = XLSX.utils.aoa_to_sheet(char_names);
+    XLSX.utils.book_append_sheet(wb, ws, "Characters");
+  }
   XLSX.writeFile(wb, files[0].name.replace(`.txt`, `.xlsx`));
 }
 function reset() {
   wb = XLSX.utils.book_new();
   finished = [];
+  char_names = [];
+  char_names_used = [];
   resultElement.innerHTML = "";
   document.getElementById("download").style.display = `none`;
   document.getElementById("reset").style.display = `none`;
