@@ -34,6 +34,7 @@ var resultElement = document.getElementById(`result`);
 var finished = [];
 var char_names = [];
 var char_names_used = [];
+var converted_sheet = [];
 
 var isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
 
@@ -189,11 +190,7 @@ function convert() {
     };
     reader.onloadend = (e) => {
       var ws = XLSX.utils.aoa_to_sheet(result);
-      XLSX.utils.book_append_sheet(
-        wb,
-        ws,
-        files[finished.length].name.replace(`.txt`, ``)
-      );
+      converted_sheet.push(ws);
       finished.push(files[finished.length].name);
       var node = document.createElement("P");
       var textnode = document.createTextNode(
@@ -215,6 +212,13 @@ function download() {
     console.log(char_names);
     var ws = XLSX.utils.aoa_to_sheet(char_names);
     XLSX.utils.book_append_sheet(wb, ws, "Characters");
+  }
+  for (var i = 0; i < finished.length; i++) {
+    XLSX.utils.book_append_sheet(
+      wb,
+      converted_sheet[i],
+      files[i].name.replace(`.txt`, ``)
+    );
   }
   XLSX.writeFile(wb, files[0].name.replace(`.txt`, `.xlsx`));
 }
