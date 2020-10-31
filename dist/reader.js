@@ -36,8 +36,10 @@ var char_names = [];
 var char_names_used = [];
 var converted_sheet = [];
 
+var getCharNamesImagesElement = document.getElementById("CHAR_NAMES_IMAGES");
+getCharNamesImagesElement.addEventListener("change", getCharImageChange, false);
 var isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
-
+var isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
 function read() {
   reset();
   files = document.getElementById("input").files;
@@ -55,6 +57,7 @@ function convert() {
   var selection = [];
   var selectInputs = document.getElementsByName(`TAG`);
   isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
+  isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
   for (var t = 0; t < selectInputs.length; t++) {
     if (selectInputs[t].checked) {
       selection.push(selectInputs[t].value);
@@ -72,6 +75,7 @@ function convert() {
       result = [];
       lines = e.target.result.split("\n");
       var decision = {};
+      var char_image = "";
       lines.forEach((line, line_index) => {
         if (line.match(tagRE)) {
           var { tag, params } = line.match(tagRE).groups;
@@ -159,6 +163,25 @@ function convert() {
             }
             lastLine = tag;
           }
+          //Extra Character Names + Images
+          if (isSelectedGetCharNamesImages) {
+            if (tag === "CHARACTER") {
+              var obj = {};
+              params = params.split(`,`);
+              params.forEach((param) => {
+                param = param.trim();
+                var [key, value] = param.split(`=`);
+                obj[key] = value.replaceAll(`"`, ``);
+              });
+              params = obj;
+              if (params.name2 && params.focus === "2") {
+                char_image = params.name2;
+              } else {
+                char_image = params.name;
+              }
+              console.log(char_image);
+            }
+          }
         } else {
           if (line.match(dialogRE)) {
             var { name, text } = line.match(dialogRE).groups;
@@ -172,7 +195,11 @@ function convert() {
             //Extra Character Names
             if (isSelectedGetCharNames) {
               if (!char_names_used.includes(name)) {
-                char_names.push([name]);
+                var arr = [name];
+                if (isSelectedGetCharNamesImages) {
+                  arr.push(char_image);
+                }
+                char_names.push(arr);
                 char_names_used.push(name);
               }
             }
@@ -183,6 +210,10 @@ function convert() {
                 result.push([""]);
               result.push(["", line]);
               lastLine = `DESCRIPTION`;
+            }
+            //Extra Character Names + Images
+            if (line === /[cC]haracter/) {
+              char_image = "";
             }
           }
         }
@@ -209,7 +240,6 @@ function convert() {
 
 function download() {
   if (isSelectedGetCharNames) {
-    console.log(char_names);
     var ws = XLSX.utils.aoa_to_sheet(char_names);
     XLSX.utils.book_append_sheet(wb, ws, "Characters");
   }
@@ -231,4 +261,10 @@ function reset() {
   document.getElementById("download").style.display = `none`;
   document.getElementById("reset").style.display = `none`;
   document.getElementById("convert").style.display = `none`;
+}
+
+function getCharImageChange() {
+  if (getCharNamesImagesElement.checked) {
+    document.getElementById("CHAR_NAMES").checked = true;
+  }
 }

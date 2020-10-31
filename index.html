@@ -10,6 +10,7 @@
         width: 100%;
         margin: 1rem;
         padding: 1rem;
+        overflow: scroll;
       }
       .options {
         margin: 0.5rem 0;
@@ -24,9 +25,6 @@
         justify-content: center;
         align-items: center;
         flex-direction: column;
-      }
-      #result {
-        overflow: scroll;
       }
       .block {
         height: 50vh;
@@ -111,7 +109,7 @@
         </div>
         <div class="options">
           <input type="checkbox" name="TAG" id="CHARACTER" value="CHARACTER" />
-          <label for="CHARACTER">CHARACTER IMAGES</label>
+          <label for="CHARACTER">CHARACTERS IMAGES</label>
         </div>
         <h2>Extra :</h2>
         <div class="options">
@@ -121,7 +119,16 @@
             id="CHAR_NAMES"
             value="CHAR_NAMES"
           />
-          <label for="CHAR_NAMES">CHARACTER NAMES SHEET</label>
+          <label for="CHAR_NAMES">CHARACTERS NAMES SHEET</label>
+        </div>
+        <div class="options">
+          <input
+            type="checkbox"
+            name="EXTRA"
+            id="CHAR_NAMES_IMAGES"
+            value="CHAR_NAMES_IMAGES"
+          />
+          <label for="CHAR_NAMES_IMAGES">CHARACTERS NAMES SHEET + IMAGES</label>
         </div>
       </fieldset>
       <div class="btn-block">
