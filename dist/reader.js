@@ -245,13 +245,14 @@ function convert() {
               } else {
                 char_names.forEach((m) => {
                   if (m[0] === name) {
-                    if (!m.includes(char_image)) {
+                    if (!m.includes(char_image) && char_image.length > 0) {
                       m.push(char_image);
                     }
                   }
                 });
               }
             }
+            if (char_image.length > 0) char_image = "";
             lastLine = `DIALOG`;
           } else {
             if (line.length > 1 && line[0] !== `[` && !line.includes(`//`)) {
