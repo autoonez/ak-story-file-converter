@@ -109,7 +109,7 @@ function convert() {
                 result.push([`[BACKGROUND]`, params.image || `bg_black`]);
                 break;
               case `IMAGE`:
-                result.push([`[IMAGE]`, params.image || `bg_black`]);
+                if (params.image) result.push([`[IMAGE]`, params.image]);
                 break;
               case `DECISION`:
                 result.push([`[DECISION]`]);
