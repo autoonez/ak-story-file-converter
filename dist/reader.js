@@ -3,27 +3,54 @@ const dialogRE = /\[[Nn]ame=\"(?<name>.*)\"\](?<text>.*)/;
 const decisionRE = /\[[dD]ecision\(options="(?<options>.*)"[,|, ]+values="(?<values>.*)"\)\]/;
 const tagList = [
   "HEADER",
+  "DIALOG",
   "PLAYMUSIC",
-  "BACKGROUND",
   "DELAY",
-  "CHARACTER",
   "BLOCKER",
+  "CHARACTER",
   "IMAGE",
   "IMAGETWEEN",
+  "BACKGROUND",
   "STOPMUSIC",
-  "DECISION",
-  "PREDICATE",
   "PLAYSOUND",
   "CAMERASHAKE",
-  "DIALOG",
-  "BACKGROUNDTWEEN",
+  "SHOWITEM",
+  "HIDEITEM",
+  "CHARACTER",
+  "PLAYSOUND",
+  "IMAGE",
   "CAMERAEFFECT",
+  "STOPMUSIC",
+  "BACKGROUNDTWEEN",
+  "DIALOG",
+  "DECISION",
+  "PREDICATE",
+  "CAMERAEFFECT",
+  "DELAY",
   "CHARACTERCUTIN",
   "STOPSOUND",
-  "DALEY",
+  "PLAYMUSIC",
+  "DEALY",
+  "SHOWITEM",
   "HIDEITEM",
-  "DIALOG",
-  "DESCRIPTION",
+  "CHARACTER]",
+  "BACKGROUND",
+  "STOPMUCIS",
+  "MUSICVOLUME",
+  "BACKGROUNDTWEEN",
+  "SKIPTOTHIS",
+  "STARTBATTLE",
+  "TUTORIAL",
+  "STOPSOUND",
+  "BLOCKER",
+  "STOPMUSIC",
+  "DIALOG ",
+  "DALEY",
+  "CHARACTERACTION",
+  "SUBTITLE",
+  "SKIPNODE",
+  "THEATER",
+  "VIDEO",
 ];
 
 const inputElement = document.getElementById("input");
@@ -168,6 +195,9 @@ function convert() {
                 result.push([`[STOPSOUND]`]);
               case `CAMERASHAKE`:
                 result.push([`[CAMERASHAKE]`]);
+                break;
+              case `SUBTITLE`:
+                result.push([`[SUBTITLE]`, params.text]);
                 break;
               default:
                 break;
