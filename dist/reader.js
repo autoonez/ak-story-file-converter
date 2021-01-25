@@ -152,6 +152,7 @@ function convert() {
             switch (tag) {
               case `BACKGROUND`:
                 result.push([
+                  ``,
                   `[BACKGROUND]`,
                   `https://autoonez.github.io/ak-story/images/backgrounds/${
                     params.image || `bg_black`
@@ -161,18 +162,19 @@ function convert() {
               case `IMAGE`:
                 if (params.image)
                   result.push([
+                    ``,
                     `[IMAGE]`,
                     `https://autoonez.github.io/ak-story/images/images/${params.image}.png`,
                   ]);
                 break;
               case `DECISION`:
-                result.push([`[DECISION]`]);
+                result.push([``, `[DECISION]`]);
                 params.options.forEach((option, option_index) => {
                   var value = params.values[option_index];
-                  result.push([`[OPTION ${value}]`, option]);
+                  result.push([``, `[OPTION ${value}]`, option]);
                   decision[value] = result.length;
                 });
-                result.push([`[END_DECISION]`]);
+                result.push([``, `[END_DECISION]`]);
                 break;
               case `PREDICATE`:
                 params.references = params.references.split(`;`);
@@ -181,6 +183,7 @@ function convert() {
                   references.push(decision[ref])
                 );
                 result.push([
+                  ``,
                   `[PREDICATE]`,
                   params.references.join(`,`),
                   `from line ${references.join(`,`)}`,
@@ -202,27 +205,28 @@ function convert() {
                     char_images.push(char_image);
                   }
                 }
-                if(lastLine==='DIALOG'){
-                  result.pop()
+                if (lastLine === "DIALOG") {
+                  result.pop();
                 }
                 break;
               case `PLAYMUSIC`:
                 result.push([
+                  ``,
                   `[PLAYMUSIC]`,
                   `intro:${params.intro.replace(`$`, ``)}`,
                   `loop:${params.key.replace(`$`, ``)}`,
                 ]);
                 break;
               case `PLAYSOUND`:
-                result.push([`[PLAYSOUND]`, params.key.replace(`$`, ``)]);
+                result.push([``, `[PLAYSOUND]`, params.key.replace(`$`, ``)]);
                 break;
               case `STOPSOUND`:
-                result.push([`[STOPSOUND]`]);
+                result.push([``, `[STOPSOUND]`]);
               case `CAMERASHAKE`:
-                result.push([`[CAMERASHAKE]`]);
+                result.push([``, `[CAMERASHAKE]`]);
                 break;
               case `SUBTITLE`:
-                result.push([`[SUBTITLE]`, params.text]);
+                result.push([``, `[SUBTITLE]`, params.text]);
                 break;
               default:
                 break;
@@ -265,7 +269,7 @@ function convert() {
             if (document.getElementById("CHARACTER").checked) {
               result.push([char_image, name, text]);
             } else {
-              result.push([name, text]);
+              result.push([``, name, text]);
             }
 
             //Extra Character Names
@@ -295,7 +299,7 @@ function convert() {
             if (line.length > 1 && line[0] !== `[` && !line.includes(`//`)) {
               if (lastLine !== `DESCRIPTION` && result.length > 0)
                 result.push([""]);
-              result.push(["", line]);
+              result.push(["", ``, line]);
               lastLine = `DESCRIPTION`;
             }
             //Extra Character Names + Images
