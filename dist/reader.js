@@ -202,7 +202,9 @@ function convert() {
                     char_images.push(char_image);
                   }
                 }
-                result.pop();
+                if(lastLine==='DIALOG'){
+                  result.pop()
+                }
                 break;
               case `PLAYMUSIC`:
                 result.push([
@@ -247,9 +249,12 @@ function convert() {
             }
           }
         } else {
+          //#DIALOG
           if (line.match(dialogRE)) {
             var { name, text } = line.match(dialogRE).groups;
             if (text.length > 1 && text[0] === " ") text = text.trim();
+
+            //insert blank row if previous row is not related to dialog
             if (
               ![`DIALOG`, `PREDICATE`, `CHARACTER`].includes(lastLine) &&
               result.length > 0
