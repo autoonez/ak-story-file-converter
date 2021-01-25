@@ -67,6 +67,11 @@ var getCharNamesImagesElement = document.getElementById("CHAR_NAMES_IMAGES");
 getCharNamesImagesElement.addEventListener("change", getCharImageChange, false);
 var isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
 var isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
+
+//Character Images Lookup
+var isSelectedGetCharImagesLoopUp = false;
+var char_images = [];
+
 function read() {
   reset();
   files = document.getElementById("input").files;
@@ -90,6 +95,12 @@ function convert() {
   var selectInputs = document.getElementsByName(`TAG`);
   isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
   isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
+
+  //Character Images Lookup
+  isSelectedGetCharImagesLoopUp = document.getElementById("CHAR_IMAGES_LOOKUP")
+    .checked;
+
+  //Check selected tags
   for (var t = 0; t < selectInputs.length; t++) {
     if (selectInputs[t].checked) {
       selection.push(selectInputs[t].value);
@@ -97,6 +108,13 @@ function convert() {
       if (selectInputs[t].value === `PLAYMUSIC`) selection.push(`STOPSOUND`);
     }
   }
+  if (
+    (isSelectedGetCharNamesImages || isSelectedGetCharImagesLoopUp) &&
+    !selection.includes("CHARACTER")
+  ) {
+    selection.push("CHARACTER");
+  }
+
   for (var i = 0; i < files.length; i++) {
     var result = [];
     var lastLine = "";
@@ -133,10 +151,19 @@ function convert() {
 
             switch (tag) {
               case `BACKGROUND`:
-                result.push([`[BACKGROUND]`, params.image || `bg_black`]);
+                result.push([
+                  `[BACKGROUND]`,
+                  `https://autoonez.github.io/ak-story/images/backgrounds/${
+                    params.image || `bg_black`
+                  }.png`,
+                ]);
                 break;
               case `IMAGE`:
-                if (params.image) result.push([`[IMAGE]`, params.image]);
+                if (params.image)
+                  result.push([
+                    `[IMAGE]`,
+                    `https://autoonez.github.io/ak-story/images/images/${params.image}.png`,
+                  ]);
                 break;
               case `DECISION`:
                 result.push([`[DECISION]`]);
@@ -161,25 +188,21 @@ function convert() {
                 break;
               case `CHARACTER`:
                 if (params.name) {
-                  var arr = [`[CHARACTER]`, params.name];
-                  if (params.name2)
-                    arr = [
-                      `[CHARACTER]`,
-                      params.name,
-                      params.name2,
-                      `focus ${params.focus}`,
-                    ];
-                  result.push(arr);
-                  if (isSelectedGetCharNamesImages) {
-                    if (params.name2 && params.focus === "2") {
-                      char_image = params.name2;
-                    } else {
-                      char_image = params.name;
-                    }
+                  if (params.name2 && params.focus === "2") {
+                    char_image = params.name2;
+                  } else {
+                    char_image = params.name;
                   }
-                } else {
-                  result.pop();
+
+                  //CHARACTERS IMAGES LOOKUP SHEET
+                  if (
+                    isSelectedGetCharImagesLoopUp &&
+                    !char_images.includes(char_image)
+                  ) {
+                    char_images.push(char_image);
+                  }
                 }
+                result.pop();
                 break;
               case `PLAYMUSIC`:
                 result.push([
@@ -232,7 +255,14 @@ function convert() {
               result.length > 0
             )
               result.push([""]);
-            result.push([name, text]);
+
+            //Character Images
+            if (document.getElementById("CHARACTER").checked) {
+              result.push([char_image, name, text]);
+            } else {
+              result.push([name, text]);
+            }
+
             //Extra Character Names
             if (isSelectedGetCharNames) {
               if (!char_names_used.includes(name)) {
@@ -252,7 +282,9 @@ function convert() {
                 });
               }
             }
+
             if (char_image.length > 0) char_image = "";
+
             lastLine = `DIALOG`;
           } else {
             if (line.length > 1 && line[0] !== `[` && !line.includes(`//`)) {
@@ -292,6 +324,20 @@ function download() {
   if (isSelectedGetCharNames) {
     var ws = XLSX.utils.aoa_to_sheet(char_names);
     XLSX.utils.book_append_sheet(wb, ws, "Characters");
+  }
+  //CHARACTERS IMAGES LOOKUP SHEET
+  if (isSelectedGetCharImagesLoopUp) {
+    char_images = char_images.sort((a, b) => {
+      if (a < b) {
+        return -1;
+      }
+      if (a > b) {
+        return 1;
+      }
+      return 0;
+    });
+    var ws = XLSX.utils.aoa_to_sheet(char_images.map((i) => [i]));
+    XLSX.utils.book_append_sheet(wb, ws, "Characters Images Lookup");
   }
   for (var i = 0; i < finished.length; i++) {
     XLSX.utils.book_append_sheet(
