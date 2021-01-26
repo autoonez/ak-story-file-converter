@@ -292,7 +292,15 @@ function convert() {
               }
             }
 
-            if (char_image.length > 0) char_image = "";
+            if(lines[line_index+1].match(dialogRE)){
+              var nextLine = lines[line_index+1]
+              var nextParams = nextLine.match(dialogRE).groups;
+              if(nextParams.name !== name){
+                char_image = "";
+              }
+            }else{
+              char_image = "";
+            }
 
             lastLine = `DIALOG`;
           } else {
