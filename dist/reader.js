@@ -192,9 +192,9 @@ function convert() {
               case `CHARACTER`:
                 if (params.name) {
                   if (params.name2 && params.focus === "2") {
-                    char_image = params.name2;
+                    char_image = params.name2.toLowerCase();
                   } else {
-                    char_image = params.name;
+                    char_image = params.name.toLowerCase();
                   }
 
                   //CHARACTERS IMAGES LOOKUP SHEET
