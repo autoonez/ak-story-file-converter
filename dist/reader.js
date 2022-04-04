@@ -1,6 +1,9 @@
-const tagRE = /\[(?<tag>.*)\((?<params>.*)\)\]/;
-const dialogRE = /\[[Nn]ame=\"(?<name>.*)\"\](?<text>.*)/;
-const decisionRE = /\[[dD]ecision\(options="(?<options>.*)"[,|, ]+values="(?<values>.*)"\)\]/;
+const tagRE = /\[(?<tag>.+?)\((?<params>.*)\)\]/;
+const dialogRE =
+  /\[[Nn][Aa][Mm][Ee]="(?<name>.*)"(?<params>.*)\]\s*(?<text>.*)/g;
+const decisionRE =
+  /\[[dD]ecision\(options="(?<options>.*)"[,|, ]+values="(?<values>.*)"\)\]/;
+const splitParamsRegEx = /(?<name>\w*?)\s*=\s*(?<value>".*?"|[^",)\]\s]*)/g;
 const tagList = [
   "HEADER",
   "DIALOG",
@@ -97,8 +100,8 @@ function convert() {
   isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
 
   //Character Images Lookup
-  isSelectedGetCharImagesLoopUp = document.getElementById("CHAR_IMAGES_LOOKUP")
-    .checked;
+  isSelectedGetCharImagesLoopUp =
+    document.getElementById("CHAR_IMAGES_LOOKUP").checked;
 
   //Check selected tags
   for (var t = 0; t < selectInputs.length; t++) {
@@ -129,22 +132,31 @@ function convert() {
         if (line.match(tagRE)) {
           var { tag, params } = line.match(tagRE).groups;
           tag = tag.toUpperCase();
+
           if (selection.includes(tag)) {
-            if (tag === `DECISION`) {
-              params = line.match(decisionRE).groups;
-              Object.keys(params).forEach((key) => {
-                params[key] = params[key].split(`;`).map((v) => v.trim());
-              });
-            } else {
-              var obj = {};
-              params = params.split(`,`);
-              params.forEach((param) => {
-                param = param.trim();
-                var [key, value] = param.split(`=`);
-                obj[key] = value.replaceAll(`"`, ``);
-              });
-              params = obj;
+            // if (tag === `DECISION`) {
+            //   params = line.match(decisionRE).groups;
+            //   Object.keys(params).forEach((key) => {
+            //     params[key] = params[key].split(`;`).map((v) => v.trim());
+            //   });
+            // } else {
+            //   console.log({ line });
+            //   var obj = {};
+            //   params = params.split(`,`);
+            //   params.forEach((param) => {
+            //     param = param.trim();
+            //     var [key, value] = param.split(`=`);
+            //     obj[key] = value.replaceAll(`"`, ``);
+            //   });
+            //   params = obj;
+            // }
+            let newParams = {};
+            let exeResult;
+            while ((exeResult = splitParamsRegEx.exec(params)) !== null) {
+              let { name, value } = exeResult.groups;
+              newParams[name] = value.replace(/"/g, "");
             }
+            params = newParams;
 
             if (![`PREDICATE`, tag].includes(lastLine) && result.length > 0)
               result.push([""]);
@@ -255,8 +267,17 @@ function convert() {
         } else {
           //#DIALOG
           if (line.match(dialogRE)) {
-            var { name, text } = line.match(dialogRE).groups;
-            if (text.length > 1 && text[0] === " ") text = text.trim();
+            // var { name, text } = line.match(dialogRE).groups;
+            // if (text.length > 1 && text[0] === " ") text = text.trim();
+            let { name, params, text } = dialogRE.exec(line).groups;
+
+            let newParams = {};
+            let exeResult;
+            while ((exeResult = splitParamsRegEx.exec(params)) !== null) {
+              let { name, value } = exeResult.groups;
+              newParams[name] = value.replace(/"/g, "");
+            }
+            params = newParams;
 
             //insert blank row if previous row is not related to dialog
             if (
@@ -292,13 +313,13 @@ function convert() {
               }
             }
 
-            if(lines[line_index+1].match(dialogRE)){
-              var nextLine = lines[line_index+1]
-              var nextParams = nextLine.match(dialogRE).groups;
-              if(nextParams.name !== name){
+            if (lines[line_index + 1].match(dialogRE)) {
+              let nextLine = lines[line_index + 1];
+              let nextParams = dialogRE.exec(line).groups;
+              if (nextParams.name !== name) {
                 char_image = "";
               }
-            }else{
+            } else {
               char_image = "";
             }
 
