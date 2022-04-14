@@ -150,7 +150,7 @@ function convert() {
                 result.push([
                   ``,
                   `[BACKGROUND]`,
-                  `https://autoonez.github.io/ak-story/images/backgrounds/${
+                  `https://autoonez.github.io/arknights-assets/images/avg/bg/${
                     params.image || `bg_black`
                   }.png`,
                 ]);
@@ -160,7 +160,7 @@ function convert() {
                   result.push([
                     ``,
                     `[IMAGE]`,
-                    `https://autoonez.github.io/ak-story/images/images/${params.image}.png`,
+                    `https://autoonez.github.io/arknights-assets/images/avg/imgs/${params.image}.png`,
                   ]);
                 break;
               case `DECISION`:
