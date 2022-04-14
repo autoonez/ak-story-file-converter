@@ -134,22 +134,6 @@ function convert() {
           tag = tag.toUpperCase();
 
           if (selection.includes(tag)) {
-            // if (tag === `DECISION`) {
-            //   params = line.match(decisionRE).groups;
-            //   Object.keys(params).forEach((key) => {
-            //     params[key] = params[key].split(`;`).map((v) => v.trim());
-            //   });
-            // } else {
-            //   console.log({ line });
-            //   var obj = {};
-            //   params = params.split(`,`);
-            //   params.forEach((param) => {
-            //     param = param.trim();
-            //     var [key, value] = param.split(`=`);
-            //     obj[key] = value.replaceAll(`"`, ``);
-            //   });
-            //   params = obj;
-            // }
             let newParams = {};
             let exeResult;
             while ((exeResult = splitParamsRegEx.exec(params)) !== null) {
@@ -181,8 +165,10 @@ function convert() {
                 break;
               case `DECISION`:
                 result.push([``, `[DECISION]`]);
-                params.options.forEach((option, option_index) => {
-                  var value = params.values[option_index];
+                let options = params.options.split(";");
+                let values = params.values.split(";");
+                options.forEach((option, option_index) => {
+                  var value = values[option_index];
                   result.push([``, `[OPTION ${value}]`, option]);
                   decision[value] = result.length;
                 });
