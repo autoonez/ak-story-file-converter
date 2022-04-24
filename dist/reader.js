@@ -1,4 +1,4 @@
-const tagRE = /\[(?<tag>.+?)\((?<params>.*)\)\]/;
+const tagRE = /\[(?<tag>.+?)\((?<params>.*)\)\]\s*(?<other>.*)/g;
 const dialogRE =
   /\[[Nn][Aa][Mm][Ee]="(?<name>.*)"(?<params>.*)\]\s*(?<text>.*)/g;
 const decisionRE =
@@ -94,7 +94,7 @@ function convert() {
   char_names = [];
   char_names_used = [];
 
-  var selection = [];
+  var selection = ["MULTILINE"];
   var selectInputs = document.getElementsByName(`TAG`);
   isSelectedGetCharNames = document.getElementById("CHAR_NAMES").checked;
   isSelectedGetCharNamesImages = getCharNamesImagesElement.checked;
@@ -130,7 +130,7 @@ function convert() {
       var char_image = "";
       lines.forEach((line, line_index) => {
         if (line.match(tagRE)) {
-          var { tag, params } = line.match(tagRE).groups;
+          let { tag, params, other } = tagRE.exec(line).groups;
           tag = tag.toUpperCase();
 
           if (selection.includes(tag)) {
@@ -142,8 +142,15 @@ function convert() {
             }
             params = newParams;
 
-            if (![`PREDICATE`, tag].includes(lastLine) && result.length > 0)
-              result.push([""]);
+            if (![`PREDICATE`, tag].includes(lastLine) && result.length > 0) {
+              if (tag === `MULTILINE`) {
+                if (lastLine && lastLine !== "DIALOG") {
+                  result.push([""]);
+                }
+              } else {
+                result.push([""]);
+              }
+            }
 
             switch (tag) {
               case `BACKGROUND`:
@@ -226,10 +233,18 @@ function convert() {
               case `SUBTITLE`:
                 result.push([``, `[SUBTITLE]`, params.text]);
                 break;
+              case `MULTILINE`: {
+                result.push([``, params.name || "", other?.trim() || ""]);
+                break;
+              }
               default:
                 break;
             }
-            lastLine = tag;
+            if (tag === `MULTILINE`) {
+              lastLine = `DIALOG`;
+            } else {
+              lastLine = tag;
+            }
           } else {
             //Extra Character Names + Images
             if (isSelectedGetCharNamesImages) {
