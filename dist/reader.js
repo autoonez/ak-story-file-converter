@@ -103,6 +103,9 @@ function convert() {
   isSelectedGetCharImagesLoopUp =
     document.getElementById("CHAR_IMAGES_LOOKUP").checked;
 
+  const isSelectedLayoutForStoryReader =
+    document.getElementById("FOR_STORY_READER").checked;
+
   //Check selected tags
   for (var t = 0; t < selectInputs.length; t++) {
     if (selectInputs[t].checked) {
@@ -128,6 +131,13 @@ function convert() {
       lines = e.target.result.split("\n");
       var decision = {};
       var char_image = "";
+
+      //Layout for Story Reader
+      if (isSelectedLayoutForStoryReader) {
+        result.push(["[FILE]", files[finished.length].name]);
+        result.push(["[LAYOUT]", "", "", "", "[NAME]", "[TEXT]"]);
+      }
+
       lines.forEach((line, line_index) => {
         if (line.match(tagRE)) {
           let { tag, params, other } = tagRE.exec(line).groups;
@@ -161,6 +171,14 @@ function convert() {
                     params.image || `bg_black`
                   }.png`,
                 ]);
+
+                if (isSelectedLayoutForStoryReader) {
+                  result[result.length - 1] = [
+                    `[${tag}]`,
+                    ...result[result.length - 1],
+                  ];
+                }
+
                 break;
               case `IMAGE`:
                 if (params.image)
@@ -169,17 +187,27 @@ function convert() {
                     `[IMAGE]`,
                     `https://autoonez.github.io/arknights-assets/images/avg/imgs/${params.image}.png`,
                   ]);
+
+                if (isSelectedLayoutForStoryReader) {
+                  result[result.length - 1] = [
+                    `[${tag}]`,
+                    ...result[result.length - 1],
+                  ];
+                }
+
                 break;
               case `DECISION`:
-                result.push([``, `[DECISION]`]);
+                result.push([`[DECISION]`]);
                 let options = params.options.split(";");
                 let values = params.values.split(";");
                 options.forEach((option, option_index) => {
                   var value = values[option_index];
-                  result.push([``, `[OPTION ${value}]`, option]);
+                  isSelectedLayoutForStoryReader
+                    ? result.push([`[OPTION ${value}]`, ``, ``, option])
+                    : result.push([`[OPTION ${value}]`, ``, option]);
                   decision[value] = result.length;
                 });
-                result.push([``, `[END_DECISION]`]);
+                result.push([`[END_DECISION]`]);
                 break;
               case `PREDICATE`:
                 params.references = params.references.split(`;`);
@@ -188,7 +216,6 @@ function convert() {
                   references.push(decision[ref])
                 );
                 result.push([
-                  ``,
                   `[PREDICATE]`,
                   params.references.join(`,`),
                   `from line ${references.join(`,`)}`,
@@ -216,25 +243,33 @@ function convert() {
                 break;
               case `PLAYMUSIC`:
                 result.push([
-                  ``,
                   `[PLAYMUSIC]`,
                   `intro:${params.intro.replace(`$`, ``)}`,
                   `loop:${params.key.replace(`$`, ``)}`,
                 ]);
                 break;
               case `PLAYSOUND`:
-                result.push([``, `[PLAYSOUND]`, params.key.replace(`$`, ``)]);
+                result.push([`[PLAYSOUND]`, params.key.replace(`$`, ``)]);
                 break;
               case `STOPSOUND`:
-                result.push([``, `[STOPSOUND]`]);
+                result.push([`[STOPSOUND]`]);
               case `CAMERASHAKE`:
-                result.push([``, `[CAMERASHAKE]`]);
+                result.push([`[CAMERASHAKE]`]);
                 break;
               case `SUBTITLE`:
-                result.push([``, `[SUBTITLE]`, params.text]);
+                isSelectedLayoutForStoryReader
+                  ? result.push([`[SUBTITLE]`, ``, ``, params.text])
+                  : result.push([`[SUBTITLE]`, ``, params.text]);
                 break;
               case `MULTILINE`: {
-                result.push([``, params.name || "", other?.trim() || ""]);
+                isSelectedLayoutForStoryReader
+                  ? result.push([
+                      `[MULTILINE]`,
+                      ``,
+                      params.name || "",
+                      other?.trim() || "",
+                    ])
+                  : result.push([``, params.name || "", other?.trim() || ""]);
                 break;
               }
               default:
@@ -287,11 +322,16 @@ function convert() {
             )
               result.push([""]);
 
-            //Character Images
-            if (document.getElementById("CHARACTER").checked) {
-              result.push([char_image, name, text]);
-            } else {
-              result.push([``, name, text]);
+            result.push([
+              document.getElementById("CHARACTER").checked ? char_image : ``,
+              name,
+              text,
+            ]);
+            if (isSelectedLayoutForStoryReader) {
+              result[result.length - 1] = [
+                "[DIALOG]",
+                ...result[result.length - 1],
+              ];
             }
 
             //Extra Character Names
@@ -327,9 +367,16 @@ function convert() {
             lastLine = `DIALOG`;
           } else {
             if (line.length > 1 && line[0] !== `[` && !line.includes(`//`)) {
-              if (lastLine !== `DESCRIPTION` && result.length > 0)
+              if (lastLine !== `DESCRIPTION` && result.length > 0) {
                 result.push([""]);
+              }
               result.push(["", ``, line]);
+              if (isSelectedLayoutForStoryReader) {
+                result[result.length - 1] = [
+                  "[DESCRIPTION]",
+                  ...result[result.length - 1],
+                ];
+              }
               lastLine = `DESCRIPTION`;
             }
             //Extra Character Names + Images
